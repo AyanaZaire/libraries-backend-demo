@@ -30,3 +30,51 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Your app is listening on port: ${port}`)
 })
+
+const CommentSchema = new mongoose.Schema({
+    body: {type: String, required: true},
+    date: { type: Date, default: Date.now }
+  });
+
+const Comment = mongoose.model("Comment", CommentSchema);
+
+const LibrarySchema = new mongoose.Schema({
+    name: {type: String, required: true},
+    description: String,
+    address: {type: String, required: true},
+    area: String,
+    image: {type: String, required: true},
+    area_director: String,
+    website: String,
+    year: Number,
+    aa_town: Boolean,
+    comments: [CommentSchema]
+  });
+  
+const Library = mongoose.model("Library", LibrarySchema);
+
+// under schema and models 
+app.get('/libraries', async (request, response) => {
+    const libraries = await Library.find({})
+    try {
+      response.send(libraries);
+    } catch (error) {
+      response.status(500).send(error);
+    }
+});
+
+app.post("/libraries/:id/comments", async (request, response) => {
+    // find library
+    const id = request.params.id
+    const library = await Library.findById(id)
+    // create comment for library
+    const newComment = request.body
+    //library.updateOne(_id: id, {$push: {comments: newÇomment}})
+    library.comments.push({body: newComment.body})
+    try {
+      await library.save();
+      response.send(library);
+    } catch (error) {
+      response.status(500).send(error);
+    }
+});
