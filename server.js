@@ -96,3 +96,20 @@ app.put("/libraries/:libId/comments/:comId", async (request, response) => {
         response.status(500).send(error);
       }
 });
+
+app.delete("/libraries/:libId/comments/:comId", async (request, response) => {
+    // console.log("request params:", request.params);
+    const libId = request.params.libId
+    const comId = request.params.comId
+    const updatedLibrary = await Library.updateOne({
+      _id: libId}, {$pull: {comments: {_id: comId}}
+    })
+    try {
+      // console.log(updatedLibrary)
+      response.send(updatedLibrary);
+    } catch (error) {
+      console.dir(error);  // print on server console
+      response.status(500).json({ message: "Internal error", error: error }); // not needed, only if you need in client side
+      return;
+    }
+})
