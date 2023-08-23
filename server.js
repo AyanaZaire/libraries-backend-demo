@@ -63,9 +63,9 @@ app.get('/libraries', async (request, response) => {
     }
 });
 
-app.post("/libraries/:id/comments", async (request, response) => {
+app.post("/libraries/:libId/comments", async (request, response) => {
     // find library
-    const id = request.params.id
+    const id = request.params.libId
     const library = await Library.findById(id)
     // create comment for library
     const newComment = request.body
@@ -77,4 +77,22 @@ app.post("/libraries/:id/comments", async (request, response) => {
     } catch (error) {
       response.status(500).send(error);
     }
+});
+
+app.put("/libraries/:libId/comments/:comId", async (request, response) => {
+     //console.log("request params:", request.params, "request body:", request.body);
+     const libId = request.params.libId
+     const comId = request.params.comId
+     const updatedComment = request.body
+     const updatedLibrary = await Library.findOneAndUpdate(
+        {_id: libId, "comments._id": comId}, 
+        {$set: {"comments.$.body": updatedComment.body}},
+        {returnOriginal : false})
+      try {
+        console.log(updatedLibrary)
+        await updatedLibrary.save();
+        response.send(updatedLibrary);
+      } catch (error) {
+        response.status(500).send(error);
+      }
 });
